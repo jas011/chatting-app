@@ -1,0 +1,8 @@
+# ignore ALL files in ANY directory named temp
+server/node_modules/
+
+# ignore ALL files in ANY directory named temp
+Next/my-app/node_modules/
+
+
+

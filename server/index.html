@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<div>romm credentials
+    <div>
+        <input type="text" name="room" id="room" placeholder="room id">
+        <input type="text" name="user" id="user" placeholder="user name">
+        <select name="room" id="rooms">
+        </select>
+        <button onclick="submit()">join room</button>
+    </div>
+
+    <div>
+        <input type="text" name="message" id="message">
+        <button id="sendMessage">send</button>
+    </div>
+
+    <button class="btn">click meeeee!</button>
+    <button class="btn1">click meeeee1!</button>
+    <div class="messages"></div>
+
+
+
+</div>
+<script>
+    function submit(){
+        const rooms = document.querySelector("#rooms");
+        const room = document.querySelector('#room');
+        const user = document.querySelector('#user');
+        const io = new WebSocket(`ws://192.168.29.126:8000?room=${JSON.stringify(room.value.includes(",")?room.value.split(","):[room.value])}&user=${user.value}`);
+        const btn = document.querySelector('#sendMessage');
+        const message = document.querySelector('#message');
+        rooms.innerHTML = (room.value.includes(",")?room.value.split(","):[room.value]).map((room)=>`<option value='${room}'>${room}</option>`).join(" ");
+        btn.onclick = ()=>{sendMessage();}
+
+        const sendMessage = ()=>{
+            const msg = {
+                sender: user.value,
+                roomid: rooms.value,
+                chat: message.value,
+                timestamp: new Date().toLocaleString()
+            }
+            io.send(JSON.stringify(msg));
+        }
+
+        document.querySelector(".btn").onclick = ()=>{
+            const msg = {
+                recipient:"japjeet",
+                sender: user.value,
+                chat: message.value,
+                timestamp:new Date().toLocaleDateString(),
+            };
+            io.send(JSON.stringify(msg));
+        }
+        
+        document.querySelector(".btn1").onclick = () => {
+        
+            io.send(JSON.stringify({
+                type: "fetch_old_messages",
+                recipient:"jaskirat",
+                sender:"japjeet",
+                limit: 50
+            }));
+        };
+
+
+        
+
+    io.addEventListener("message", ({data}) => {
+        const msg = JSON.parse(data);
+        const messages = document.querySelector('.messages');
+        messages.innerHTML += `<li>${msg.sender}:${msg.timestamp}=>${msg.chat}</li>`;
+      });
+
+      io.addEventListener("old_messages", ({data}) => {
+        const msg = JSON.parse(data);
+        const messages = document.querySelector('.messages');
+        messages.innerHTML += `<li>${msg.sender}:${msg.timestamp}=>${msg.chat}</li>`;
+      });
+    }
+</script>
+
+
+
+    <!-- <script>
+        const message = document.querySelector("#message");
+        const messages = document.querySelector(".messages");
+        const btn = document.querySelector("#send");
+        function createRoom(){
+            const room = document.querySelector('#room').value;
+            const io = new WebSocket("ws://192.168.29.126:8000?room="+room);
+        
+        btn.onclick = ()=>{ 
+            publish();console.log(true)};
+        function publish(){
+            io.send(message.value);
+        }
+        io.addEventListener("message", (event) => {
+            console.log("Message from server ", event.data);
+            messages.innerHTML += `<li>${event.data}</li>`;
+          });}
+    </script> -->
+</body>
+</html>
